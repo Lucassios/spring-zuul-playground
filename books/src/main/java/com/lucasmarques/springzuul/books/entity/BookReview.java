@@ -16,7 +16,7 @@ public class BookReview {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private Book book;
 

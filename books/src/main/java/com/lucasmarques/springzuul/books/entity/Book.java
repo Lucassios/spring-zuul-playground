@@ -1,6 +1,7 @@
 package com.lucasmarques.springzuul.books.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * Created by lucascmarques on 06/05/17.
  */
+@NoArgsConstructor
 @Data
 @Entity
 public class Book {
@@ -39,5 +41,9 @@ public class Book {
 
     @OneToMany
     private List<Book> relatedBooks;
+
+    public Book(String isbn) {
+        this.isbn = isbn;
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.lucasmarques.springzuul.books.controller;
 
+import com.lucasmarques.springzuul.books.dto.BookReviewDTO;
 import com.lucasmarques.springzuul.books.dto.ResponseDTO;
 import com.lucasmarques.springzuul.books.entity.Book;
 import com.lucasmarques.springzuul.books.entity.BookReview;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -27,21 +29,33 @@ public class BookReviewController {
     private BookReviewRepository bookReviewRepository;
 
     @RequestMapping(value = "/book/{isbn}/reviews", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseDTO<List<BookReview>> getReviews(@PathVariable String isbn) {
-        List<BookReview> reviews = bookReviewRepository.findByBook(isbn);
-        ResponseDTO<List<BookReview>> response = new ResponseDTO<List<BookReview>>(reviews);
+    public ResponseDTO<List<BookReviewDTO>> getReviews(@PathVariable String isbn) {
+        List<BookReviewDTO> reviews = transform(bookReviewRepository.findByBook(isbn));
+        ResponseDTO<List<BookReviewDTO>> response = new ResponseDTO<List<BookReviewDTO>>(reviews);
         response.add(linkTo(methodOn(BookReviewController.class).getReviews(isbn)).withSelfRel());
         return response;
     }
 
     @RequestMapping(value = "/book/{isbn}/review", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseDTO<BookReview> createReview(@PathVariable String isbn, @RequestBody BookReview bookReview) {
+    public ResponseDTO<BookReviewDTO> createReview(@PathVariable String isbn, @RequestBody BookReview bookReview) {
         Book book = bookRepository.findOne(isbn);
         bookReview.setBook(book);
         bookReview = bookReviewRepository.save(bookReview);
-        ResponseDTO<BookReview> response = new ResponseDTO<BookReview>(bookReview);
+        ResponseDTO<BookReviewDTO> response = new ResponseDTO<BookReviewDTO>(transform(bookReview));
         response.add(linkTo(methodOn(BookReviewController.class).createReview(isbn, bookReview)).withSelfRel());
         return response;
+    }
+
+    public List<BookReviewDTO> transform(List<BookReview> reviews) {
+        List<BookReviewDTO> reviewsDTO = new ArrayList<BookReviewDTO>();
+        for (BookReview review : reviews) {
+            reviewsDTO.add(transform(review));
+        }
+        return reviewsDTO;
+    }
+
+    public BookReviewDTO transform(BookReview bookReview) {
+        return new BookReviewDTO(bookReview.getReview());
     }
 
 }
